@@ -1,0 +1,167 @@
+1)
+class Vector3D:
+    def __init__(self, x=0, y=0, z=0):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def __add__(self, other):
+        return Vector3D(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    def __sub__(self, other):
+        return Vector3D(self.x - other.x, self.y - other.y, self.z - other.z)
+
+    def __mul__(self, other):
+        if isinstance(other, Vector3D):
+            return self.x * other.x + self.y * other.y + self.z * other.z
+        elif isinstance(other, (int, float)):
+            return Vector3D(self.x * other, self.y * other, self.z * other)
+
+    def __matmul__(self, other):
+        return Vector3D(self.y * other.z - self.z * other.y,
+                        self.z * other.x - self.x * other.z,
+                        self.x * other.y - self.y * other.x)
+
+    def display(self):
+        print(f"({self.x}, {self.y}, {self.z})")
+
+    def read(self):
+        self.x = int(input("Введите координату x: "))
+        self.y = int(input("Введите координату y: "))
+        self.z = int(input("Введите координату z: "))
+
+
+# Пример использования класса
+v1 = Vector3D(4, 1, 2)
+v1.display()
+
+v2 = Vector3D()
+v2.read()
+
+v3 = Vector3D(1, 2, 3)
+
+v4 = v1 + v2
+v4.display()
+
+a = v4 * v3
+print(a)
+
+v4 = v1 * 10
+v4.display()
+
+v4 = v1 @ v3
+v4.display()
+
+
+
+2)
+import math
+
+class Triangle:
+    def __init__(self, side1, side2):
+        self.side1 = side1
+        self.side2 = side2
+
+    def increase_side(self, percent):
+        self.side1 += self.side1 * percent / 100
+        self.side2 += self.side2 * percent / 100
+
+    def decrease_side(self, percent):
+        self.side1 -= self.side1 * percent / 100
+        self.side2 -= self.side2 * percent / 100
+
+    def radius_of_circumcircle(self):
+        radius = (self.side1 * self.side2) / (4 * math.sqrt((self.side1 ** 2) + (self.side2 ** 2)))
+        return radius
+
+    def perimeter(self):
+        return self.side1 + self.side2 + math.sqrt((self.side1 ** 2) + (self.side2 ** 2))
+
+    def angles(self):
+        angle1 = math.degrees(math.asin(self.side1 / self.perimeter()))
+        angle2 = math.degrees(math.asin(self.side2 / self.perimeter()))
+        angle3 = 180 - angle1 - angle2
+        return angle1, angle2, angle3
+
+
+# Пример использования класса
+t = Triangle(3, 4)
+t.increase_side(10)  # Увеличиваем стороны на 10%
+t.decrease_side(5)  # Уменьшаем стороны на 5%
+
+radius = t.radius_of_circumcircle()
+print(f"Радиус описанной окружности: {radius}")
+
+perimeter = t.perimeter()
+print(f"Периметр треугольника: {perimeter}")
+
+angles = t.angles()
+print(f"Значения углов треугольника: {angles}")
+
+
+3)
+class Bus:
+    def __init__(self, speed, capacity, max_speed):
+        self.speed = speed
+        self.capacity = capacity
+        self.max_speed = max_speed
+        self.passengers = []
+        self.seats = {i: None for i in range(1, capacity + 1)}
+
+    def hasEmptySeats(self):
+        return len(self.passengers) < self.capacity
+
+    def add_passenger(self, *names):
+        for name in names:
+            if not self.hasEmptySeats:
+                print("Автобус заполнен. Нет свободных мест.")
+                return
+            seat = min(self.seats, key=self.seats.get)
+            self.seats[seat] = name
+            self.passengers.append(name)
+
+    def remove_passenger(self, name):
+        if name in self.passengers:
+            seat = [seat for seat, passenger in self.seats.items() if passenger == name][0]
+            self.seats[seat] = None
+            self.passengers.remove(name)
+        else:
+            print(f"Пассажир {name} не найден на автобусе.")
+
+    def increase_speed(self, value):
+        if self.speed + value <= self.max_speed:
+            self.speed += value
+        else:
+            print("Превышена максимальная скорость.")
+
+    def decrease_speed(self, value):
+        if self.speed - value >= 0:
+            self.speed -= value
+        else:
+            print("Скорость не может быть отрицательной.")
+
+    def __contains__(self, name):
+        return name in self.passengers
+
+    def __iadd__(self, name):
+        self.add_passenger(name)
+        return self
+
+    def __isub__(self, name):
+        self.remove_passenger(name)
+        return self
+
+
+# Пример использования класса
+bus = Bus(50, 30, 80)
+
+bus -= "John"  # Посадка пассажира с именем John
+bus -= "Alice"  # Посадка пассажира с именем Alice
+bus -= "Alice"  # Высадка пассажира с именем Alice
+
+bus.increase_speed(20)  # Увеличение скорости на 20
+bus.decrease_speed(10)  # Уменьшение скорости на 10
+
+print(f"Текущая скорость автобуса: {bus.speed}")
+print(f"Список пассажиров: {bus.passengers}")
+print(f"Наличие свободных мест: {bus.hasEmptySeats}")
